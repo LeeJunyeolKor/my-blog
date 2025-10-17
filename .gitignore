@@ -1,1 +1,15 @@
+# Dependencies
+/node_modules
+
+# Build-related
+/dist
+/.out/
+
+# Vite
+.vite
+
+# Environment variables
+.env*
+
+# IDE
 .vscode/
