@@ -27,13 +27,17 @@ const Header = () => {
     );
 };
 
+import Link from 'next/link';
+
+// ... (Header, Footer 컴포넌트는 동일)
+
 const Article = ({ post }) => (
     <article>
         <p className="text-slate-500 text-sm mb-2">{post.date}</p>
         <h3 className="text-xl sm:text-2xl font-bold mb-3 text-slate-900">
-            <a href="#" className="hover:text-blue-600">
+            <Link href={`/posts/${post.id}`} className="hover:text-blue-600">
                 {post.title}
-            </a>
+            </Link>
         </h3>
         {/* 상세 콘텐츠 로딩은 추후 구현 필요 */}
     </article>

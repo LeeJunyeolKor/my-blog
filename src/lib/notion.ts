@@ -68,3 +68,79 @@ export const getPosts = async () => {
     return [];
   }
 };
+
+// 특정 ID의 게시물 정보 가져오기
+export const getSinglePost = async (pageId: string) => {
+  const notionKey = process.env.NOTION_KEY;
+  if (!notionKey) {
+    console.error('Notion API 키가 설정되지 않았습니다.');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${notionKey}`,
+        'Notion-Version': '2022-06-28',
+      },
+      next: { revalidate: 0 }
+    });
+
+    if (!response.ok) {
+      console.error('Notion API 응답 오류 (getSinglePost):', await response.json());
+      return null;
+    }
+
+    const page = await response.json();
+    if (!('properties' in page)) return null;
+
+    const titleProperty = page.properties.페이지;
+    const dateProperty = page.properties.날짜;
+
+    const title = titleProperty.type === 'title' ? titleProperty.title[0]?.plain_text : '';
+    const date = dateProperty.type === 'date' ? dateProperty.date?.start : '';
+
+    return {
+      id: page.id,
+      title,
+      date,
+    };
+
+  } catch (error) {
+    console.error('Notion API에서 단일 게시물을 가져오는 중 오류 발생:', error);
+    return null;
+  }
+};
+
+// 특정 페이지의 본문 콘텐츠(블록) 가져오기
+export const getPostContent = async (pageId: string) => {
+  const notionKey = process.env.NOTION_KEY;
+  if (!notionKey) {
+    console.error('Notion API 키가 설정되지 않았습니다.');
+    return [];
+  }
+
+  try {
+    const response = await fetch(`https://api.notion.com/v1/blocks/${pageId}/children`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${notionKey}`,
+        'Notion-Version': '2022-06-28',
+      },
+      next: { revalidate: 0 }
+    });
+
+    if (!response.ok) {
+      console.error('Notion API 응답 오류 (getPostContent):', await response.json());
+      return [];
+    }
+
+    const data = await response.json();
+    return data.results;
+
+  } catch (error) {
+    console.error('Notion API에서 게시물 콘텐츠를 가져오는 중 오류 발생:', error);
+    return [];
+  }
+};
